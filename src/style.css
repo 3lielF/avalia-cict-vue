@@ -79,6 +79,10 @@ main { max-width: 1220px; margin:0 auto; padding:44px 28px 80px; }
 .left-col, .right-col { display:grid; gap:18px; }
 .panel { background:white; border:1px solid #dfe7f0; border-radius:11px; padding:20px; }
 .panel h2 { font-size:13px; margin:0 0 14px; }
+.panel-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+.panel-heading h2 { margin-bottom:6px; }
+.panel-heading .hint { margin-bottom:0 !important; }
+.autosave-label { flex:none; color:#28704d; background:#e8f4ed; border-radius:999px; padding:5px 8px; font-size:9px; white-space:nowrap; }
 .panel dl { margin:0; }
 .panel dt { color:#8997aa; font-size:9px; margin-top:12px; }
 .panel dd { margin:3px 0 0; font-size:11px; color:#263c59; }

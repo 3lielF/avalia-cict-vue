@@ -10,6 +10,7 @@ const selectedWork = ref(null)
 const toast = ref('')
 const scores = ref([0, 0, 0, 0])
 const comment = ref('')
+const draft = ref('')
 
 const works = {
   'PIBIC': [
@@ -55,13 +56,25 @@ function openType(type) {
 
 function openEvaluation(work) {
   selectedWork.value = work
-  scores.value = [0, 0, 0, 0]
-  comment.value = ''
+  const saved = JSON.parse(localStorage.getItem(`avalia-cict-${work.id}`) || 'null')
+  scores.value = saved?.scores || [0, 0, 0, 0]
+  comment.value = saved?.comment || ''
+  draft.value = saved?.draft || ''
   screen.value = 'evaluation'
 }
 
+function autosave() {
+  if (!selectedWork.value) return
+  localStorage.setItem(`avalia-cict-${selectedWork.value.id}`, JSON.stringify({
+    scores: scores.value,
+    comment: comment.value,
+    draft: draft.value
+  }))
+}
+
 function saveEvaluation() {
-  showToast('Avaliação salva com sucesso.')
+  autosave()
+  showToast('Nota enviada com sucesso.')
   screen.value = selectedType.value ? 'list' : 'pitch'
 }
 
@@ -264,19 +277,30 @@ function enter(kind) {
               <div v-for="(label, i) in ['Qualidade da apresentação e organização do conteúdo', 'Clareza e domínio do tema', 'Relevância e originalidade', 'Metodologia e resultados']" :key="label" class="criterion">
                 <label>{{ i+1 }}. {{ label }}</label>
                 <div class="score">
-                  <input v-model.number="scores[i]" type="range" min="0" max="10" step="0.5">
+                  <input v-model.number="scores[i]" @change="autosave" type="range" min="0" max="10" step="0.1">
                   <output>{{ scores[i].toFixed(1) }}</output>
                 </div>
               </div>
             </div>
+            <div class="panel draft-panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>Rascunho do docente</h2>
+                  <p class="hint">Anote impressões para retomar este trabalho depois. Este campo é salvo automaticamente.</p>
+                </div>
+                <span class="autosave-label">Salvo automaticamente</span>
+              </div>
+              <textarea v-model="draft" @input="autosave" maxlength="3000" placeholder="Ex.: lembrar de perguntar sobre a metodologia e revisar a justificativa..."></textarea>
+              <small>{{ draft.length }}/3000 caracteres</small>
+            </div>
             <div class="panel">
               <h2>Comentários Adicionais</h2>
-              <textarea v-model="comment" maxlength="2000" placeholder="Adicione comentários ou observações sobre a avaliação..."></textarea>
+              <textarea v-model="comment" @input="autosave" maxlength="2000" placeholder="Comentários que acompanharão a avaliação enviada..."></textarea>
               <small>{{ comment.length }}/2000 caracteres</small>
             </div>
             <div class="eval-footer">
               <span>Média: <b>{{ (scores.reduce((a,b)=>a+b,0)/4).toFixed(1) }}</b> / 10</span>
-              <button class="primary" @click="saveEvaluation">Salvar avaliação</button>
+              <button class="primary" @click="saveEvaluation">Enviar nota</button>
             </div>
           </div>
         </div>
